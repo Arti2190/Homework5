@@ -30,6 +30,7 @@ The `echo: false` option disables the printing of code (only output is displayed
 \### Import all the libraries
 
 ```{r}
+#install.packages("psych")
 library("tidyverse")
 #library("readr")
 
@@ -146,10 +147,16 @@ View(com_data_summ_long)
 
 ```
 
+-   Some data validation :---
+
 ```{r}
-#stat_combine_data <- combine_data |>
- # mutate(across(where(is.numeric), list(mean = mean, sd = sd, median = median), #.names = "{.col}_{.fn}"))
-#View(stat_combine_data)
+View(psych::describe(combine_data))
+```
+
+-   Determine Rate of Missing Values
+
+```{r}
+colSums(is.na(combine_data))
 ```
 
 ```{r}
@@ -160,4 +167,29 @@ miss_data <- sum(is.na(combine_data))
 cat("Number of missing values in Tibble are:-\n", miss_data)
 ```
 
-### \* In this Combine Tibble there is no missing values. 
+### \* In this Combine Data there is no missing values. 
+
+## Categorical Variables
+
+-   Create a one-way contingency table, a two-way contingency table, and a three-way contingency table
+    for some of the factor variables you created previously. Use table() to accomplish this.
+    **–** Interpret a number from each resulting table (that is, pick out a value produced and explain what
+    that value means.)
+
+-   Create a conditional two-way table using table(). That is, condition on one variable’s setting and
+    create a two-way table. Do this using two different methods:
+
+    **–** Once, by subsetting the data (say with filter()) and then creating the two-way table
+    **–** Once, by creating a three-way table and subsetting it.						
+
+-   Create a two-way contingency table using group_by() and summarize() from dplyr. Then use
+    pivot_wider() to make the result look more like the output from table().
+
+-   Create a stacked bar graph and a side-by-side bar graph. Give relevant x and y labels, and a title for
+    the plots.
+
+```{r}
+# One way contingency table
+comb
+
+```
