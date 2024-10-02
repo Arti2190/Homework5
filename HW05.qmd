@@ -1,0 +1,163 @@
+---
+title: "HW05"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed)							
+
+\### Import all the libraries
+
+```{r}
+library("tidyverse")
+#library("readr")
+
+```
+
+# **Summarizing Student Data**
+
+\## Task 1: Read in the Data and Modify\
+
+\### Use local path and combined both the datasets
+
+```{r}
+df1 <- read.csv("../Homework5/student-mat.csv", sep = ";")
+df2 <- read.csv("../Homework5/student-por.csv", sep = ";")
+
+comb_df <- merge(df1, df2, by = c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
+head(comb_df)
+#View(comb_df)
+
+```
+
+-   Warning message: In inner_join(data1, data2, by = c("school", "sex", "age", "address", : Detected an unexpected many-to-many relationship between `x` and `y`. ℹ Row 79 of `x` matches multiple rows in `y`. ℹ Row 79 of `y` matches multiple rows in `x`. ℹ If a many-to-many relationship is expected, set `relationship = "many-to-many"` to silence this warning.
+
+### Use and Inner_join() to merge the data
+
+```{r}
+#d1=read.table("student-mat.csv",sep=";",header=TRUE)
+#d2=read.table("student-por.csv",sep=";",header=TRUE)
+
+#d3=merge(d1,d2,by=c("school","sex","age","address","famsize","Pstatus","Medu"#,"Fedu","Mjob","Fjob","reason","nursery","internet"))
+#print(nrow(d3)) # 382 students
+
+math_data <- read_delim("../Homework5/student-mat.csv", delim  = ";")
+por_data <- read_delim("../Homework5/student-por.csv", delim  = ";")
+
+combine_data <- inner_join(math_data, por_data, by = c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
+print(nrow(combine_data))
+print(combine_data)
+
+other_comb_dat <- c("G1", "G2", "G3", "paid", "absences")
+
+```
+
+### \*Math data, portugueses, and combined data choose four categorical variables and  convert into factors variables in each tibble
+
+```{r}
+print(unique(math_data$sex))
+print(unique(math_data$address))
+print(unique(math_data$school))
+```
+
+```{r}
+#intersect(names(data1), names(data2))
+math_data <- math_data |>
+  mutate(school = factor(school, levels = c("GP", "MS"), labels = c("Gabriel Pereira", "Mousinho da Silveira")),
+         sex = factor(sex, levels = c("F", "M"), labels = c("Female", "Male")),
+         address = factor(address, levels = c("U","R"), labels = c("Urban", "Rural")),
+         reason = factor(reason, levels = c("home","reputation","course","other"),labels = c("Home", "Reputation", "Course", "Other")))
+
+math_data
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+por_data <- por_data |>
+  mutate(sex = factor(sex, levels = c("F", "M"), labels = c("Female", "Male")),
+         address = factor(address, levels = c("U","R"), labels = c("Urban", "Rural")),
+         school = factor(school, levels = c("GP", "MS"), labels = c("Gabriel Pereira", "Mousinho da Silveira")),
+         reason = factor(reason, levels = c("home","reputation","course","other"), labels = c("Home", "Reputation", "Course", "Other")))
+
+por_data
+```
+
+```{r}
+combine_data <- combine_data |>
+  mutate(sex = factor(sex, levels = c("F", "M"), labels = c("Female", "Male")),
+         address = factor(address, levels = c("U","R"), labels = c("Urban", "Rural")),
+         school = factor(school, levels = c("GP", "MS"), labels = c("Gabriel Pereira", "Mousinho da Silveira")),
+         reason = factor(reason, levels = c("home","reputation","course","other"), labels = c("Home", "Reputation", "Course", "Other")))
+
+View(combine_data)
+```
+
+### Task 2: Summarize the Data(Very Basic EDA)
+
+### \* Look at how the data is stored and see if everything makes sense.
+• Document the missing values in the data
+
+```{r}
+cat("Structure of combine data ",str(combine_data))
+View(combine_data)
+
+#cat("summary of combined data \n", summary(combine_data))
+
+com_data_summ <- combine_data |>
+  summarise(across(where(is.numeric), list(mean = mean, std = sd, med = median)))
+#View(com_data_summ)
+
+com_data_summ_long <- com_data_summ |>
+  pivot_longer(cols = everything(),
+               names_to = c("Feature", "Statistic"),
+               names_sep = "_",  # Separate Feature and statistic by "_"
+               values_to = "value")
+
+# View the result in long format
+View(com_data_summ_long)
+
+
+
+```
+
+```{r}
+#stat_combine_data <- combine_data |>
+ # mutate(across(where(is.numeric), list(mean = mean, sd = sd, median = median), #.names = "{.col}_{.fn}"))
+#View(stat_combine_data)
+```
+
+```{r}
+# Find the missing values
+loc_missing_data <- which(is.na(combine_data), arr.ind = TRUE)
+cat("Location of Missing values in row and column are",loc_missing_data)
+miss_data <- sum(is.na(combine_data))
+cat("Number of missing values in Tibble are:-\n", miss_data)
+```
+
+### \* In this Combine Tibble there is no missing values. 
