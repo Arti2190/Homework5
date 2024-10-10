@@ -447,6 +447,8 @@ kernel_plot <- ggplot(combine_data, aes(x = age, color = address, linetype = as.
 kernel_plot
 ```
 
+-   It is showing that most significant peak around age of 16-18 for students with 0 failures. Here is fewer students from rural address.
+
 ```{r}
 # boxplot
 school_boxplot <- ggplot(combine_data) +
@@ -462,6 +464,12 @@ school_boxplot <- ggplot(combine_data) +
 
 school_boxplot
 ```
+
+-   here we can see some outliers in both the school.
+
+-   Gabriel Pereira has a more concentrated age range with the majority of students near by 16 to 18 years.
+
+-   Mousinha da Silveira has a range above the 18 years.
 
 ```{r}
 # Boxplot
