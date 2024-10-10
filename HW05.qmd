@@ -6,27 +6,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-
-```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed)
-
 ### Import all the libraries
 
 ```{r}
@@ -80,7 +59,7 @@ other_comb_dat <- c("G1", "G2", "G3", "paid", "absences")
 
 ```
 
-### \*Math data, portugueses, and combined data choose four categorical variables and convert into factors variables in each tibble
+### \* Math data, portugueses, and combined data choose four categorical variables and convert into factors variables in each tibble
 
 ```{r}
 print(unique(math_data$sex))
@@ -117,7 +96,8 @@ combine_data <- combine_data |>
          school = factor(school, levels = c("GP", "MS"), labels = c("Gabriel Pereira", "Mousinho da Silveira")),
          reason = factor(reason, levels = c("home","reputation","course","other"), labels = c("Home", "Reputation", "Course", "Other")))
 
-View(combine_data)
+head(combine_data)
+#View(combine_data)
 ```
 
 ### Task 2: Summarize the Data
@@ -128,8 +108,8 @@ View(combine_data)
 
 ```{r}
 cat("Structure of combine data ",str(combine_data))
-View(combine_data)
-
+#View(combine_data)
+head(combine_data)
 #cat("summary of combined data \n", summary(combine_data))
 
 com_data_summ <- combine_data |>
@@ -143,9 +123,9 @@ com_data_summ_long <- com_data_summ |>
                values_to = "value")
 
 # View the result in long format
-View(com_data_summ_long)
+#View(com_data_summ_long)
 
-
+head(com_data_summ_long)
 
 ```
 
@@ -155,13 +135,14 @@ View(com_data_summ_long)
 numeric_data <- combine_data |>
   select(where(is.numeric))
 
-View(psych::describe(numeric_data))
+head(psych::describe(numeric_data))
 ```
 
 -   Determine Rate of Missing Values
 
 ```{r}
 colSums(is.na(combine_data))
+# No missing values
 ```
 
 ```{r}
@@ -192,7 +173,7 @@ cat("Number of missing values in Tibble are:-\n", miss_data)
 print("One-way contingency Table \n")
 table(combine_data$sex, useNA = "always")
 
-
+# there are 174 Female and 146 Male 
 ```
 
 ```{r}
@@ -202,12 +183,18 @@ table(combine_data$sex, combine_data$school)
 
 ```
 
+-   In Gabriel Pereira school there are 153 Female and 134 Male students.
+
+-   In Mousinho da Silveira there are 21 Female and 12 Male students.
+
 ```{r}
 # c. Three-way contingency table
 print("Three-way contingency table")
 table(combine_data$school, combine_data$address, combine_data$reason)
 
 ```
+
+-   In 3 way contingency table we differentiate data according to reason. In every reason we take the school and in every school how many students are coming from Urban and Rural address.
 
 ### 2. Create a conditional two-way table using table().
 
@@ -219,6 +206,11 @@ cond_table <- table(cond_data$sex, cond_data$school)
 cond_table
 ```
 
+-   In this we see the urban address only that in urban area how many Female and Male are coming to both the schools.
+
+```{=html}
+<!-- -->
+```
 -   **–** Once, by creating a three-way table and subsetting it.
 
 ```{r}
@@ -256,6 +248,8 @@ ggplot(combine_data) +
 
 ```
 
+-   Total height of each bar represents the total number of students enrolled in each school.
+
 -   Side by side bar graph
 
 ```{r}
@@ -273,6 +267,8 @@ ggplot(data = combine_data) +
   
 
 ```
+
+-    Comparison between Male and Female students according to school. In this it is showing that number of Female are more in Gabriel Pereira school.
 
 ## Numerical Variables (and across groups)
 
@@ -292,7 +288,7 @@ meas_of_center_long <- meas_of_center |>
                values_to = "value")
 
 # View the result in long format
-View(meas_of_center_long)
+head(meas_of_center_long)
 meas_of_center_long
 
 
@@ -312,7 +308,8 @@ subset_meas_of_center_long <- subset_sex_statistics |>
                names_to = c("Feature", "Statistic"),
                             names_sep = "_",
                values_to = "value")
-View(subset_meas_of_center_long)
+#View(subset_meas_of_center_long)
+head(subset_meas_of_center_long)
 
 ```
 
@@ -330,7 +327,7 @@ subset_school_meas_of_center_long <- subset_school_statistics |>
                names_to = c("Feature", "Statistic"),
                             names_sep = "_",
                values_to = "value")
-View(subset_school_meas_of_center_long)
+head(subset_school_meas_of_center_long)
 
 ```
 
@@ -348,7 +345,7 @@ subset_school_meas_of_center_long <- subset_school_statistics |>
                names_to = c("Feature", "Statistic"),
                             names_sep = "_",
                values_to = "value")
-View(subset_school_meas_of_center_long)
+head(subset_school_meas_of_center_long)
 ```
 
 -   Find measures of center and spread across two grouping variables for three of these variables (including a G3 variable as one of them)
@@ -365,7 +362,7 @@ school_sex_meas_of_center_long <- school_sex_statistics |>
                names_to = c("Feature", "Statistic"),
                             names_sep = "_",
                values_to = "value")
-View(school_sex_meas_of_center_long)
+head(school_sex_meas_of_center_long)
 ```
 
 -   Create a correlation matrix between all of the numeric variables
@@ -376,7 +373,7 @@ corr_mat <- combine_data |>
 
 #pair_cor_mat <- cor(corr_mat ,use = "pairwise.complete.obs")
 #pair_cor_ma
-View(cor(corr_mat))
+cor(corr_mat)
 ```
 
 -   Create a histogram, kernel density plot, and boxplot for two of the numeric variables across one of the categorical variables (that is, create graphs that can compare the distributions across the groups on the same plot (no faceting here)). Add appropriate labels and titles. \# create 6 graphs
@@ -395,6 +392,8 @@ hist_age <- ggplot(combine_data, aes(x = age, fill = sex)) +
 hist_age
 ```
 
+-   The distribution of ages is fairly consistent between males and females. Both the groups have age between 15 and 18.
+
 ```{r}
 histogram_plot <- ggplot(combine_data, aes(x = age, fill = school)) +
   geom_histogram(binwidth = 1, color = "black", position = "dodge") +
@@ -409,34 +408,38 @@ histogram_plot <- ggplot(combine_data, aes(x = age, fill = school)) +
 histogram_plot
 ```
 
+-   Gabriel Pereiran has more population compare to Mousinho da Silveira school.
+
 ```{r}
 # kernel density plot
 
-kernel_plot <- ggplot(combine_data, aes(x = age, color = school, linetype = as.factor(failures))) +
+school_kernel_plot <- ggplot(combine_data, aes(x = age, color = school, linetype = as.factor(failures))) +
   geom_density(alpha = 0.5, aes(fill = as.factor(failures))) +
   theme_minimal() +
   labs(
-    title = "Kernel Density Plot of Age by Reason and Failures",
+    title = "Kernel Density Plot of Age by school and Failures",
     x = "Age",
     y = "Density",
-    color = "Reason for Absence",
+    color = "school",
     linetype = "Number of Failures",
     fill = "Number of Failures"
   )
 
-kernel_plot
+school_kernel_plot
 ```
+
+-   In this Graph it indicates that the majority of students, especially at younger ages, have no academic failures. There is a notable peak of students around age 18 for both schools, but *Gabriel Pereira* seems to have more students in this age group without failures, while *Mousinho da Silveira* shows more students with multiple failures in older age groups.
 
 ```{r}
 # Kernel Density Plot
-kernel_plot <- ggplot(combine_data, aes(x = age, color = sex, linetype = as.factor(failures))) +
+kernel_plot <- ggplot(combine_data, aes(x = age, color = address, linetype = as.factor(failures))) +
   geom_density(alpha = 0.5, aes(fill = as.factor(failures))) +
   theme_minimal() +
   labs(
     title = "Kernel Density Plot of Age by Reason and Failures",
     x = "Age",
     y = "Density",
-    color = "Reason for Absence",
+    color = "address",
     linetype = "Number of Failures",
     fill = "Number of Failures"
   )
