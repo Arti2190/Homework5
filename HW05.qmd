@@ -25,14 +25,15 @@ You can add options to executable code like this
 2 * 2
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed)							
+The `echo: false` option disables the printing of code (only output is displayed)
 
-\### Import all the libraries
+### Import all the libraries
 
 ```{r}
 #install.packages("psych")
 library("tidyverse")
 #library("readr")
+library(ggplot2)
 
 ```
 
@@ -65,16 +66,21 @@ head(comb_df)
 
 math_data <- read_delim("../Homework5/student-mat.csv", delim  = ";")
 por_data <- read_delim("../Homework5/student-por.csv", delim  = ";")
+colnames(math_data)
+colnames(por_data)
 
-combine_data <- inner_join(math_data, por_data, by = c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
+#combine_data <- inner_join(math_data, por_data, by = #c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
+
+combine_data <- inner_join(math_data, por_data,  by = setdiff(colnames(math_data), c("G1", "G2", "G3", "paid", "absences")))
 print(nrow(combine_data))
 print(combine_data)
+colnames(combine_data)
 
 other_comb_dat <- c("G1", "G2", "G3", "paid", "absences")
 
 ```
 
-### \*Math data, portugueses, and combined data choose four categorical variables and  convert into factors variables in each tibble
+### \*Math data, portugueses, and combined data choose four categorical variables and convert into factors variables in each tibble
 
 ```{r}
 print(unique(math_data$sex))
@@ -91,11 +97,6 @@ math_data <- math_data |>
          reason = factor(reason, levels = c("home","reputation","course","other"),labels = c("Home", "Reputation", "Course", "Other")))
 
 math_data
-
-```
-
-```{r}
-
 
 ```
 
@@ -119,9 +120,10 @@ combine_data <- combine_data |>
 View(combine_data)
 ```
 
-### Task 2: Summarize the Data(Very Basic EDA)
+### Task 2: Summarize the Data
 
 ### \* Look at how the data is stored and see if everything makes sense.
+
 • Document the missing values in the data
 
 ```{r}
@@ -150,7 +152,10 @@ View(com_data_summ_long)
 -   Some data validation :---
 
 ```{r}
-View(psych::describe(combine_data))
+numeric_data <- combine_data |>
+  select(where(is.numeric))
+
+View(psych::describe(numeric_data))
 ```
 
 -   Determine Rate of Missing Values
@@ -163,33 +168,376 @@ colSums(is.na(combine_data))
 # Find the missing values
 loc_missing_data <- which(is.na(combine_data), arr.ind = TRUE)
 cat("Location of Missing values in row and column are",loc_missing_data)
+
 miss_data <- sum(is.na(combine_data))
 cat("Number of missing values in Tibble are:-\n", miss_data)
 ```
 
-### \* In this Combine Data there is no missing values. 
+### \* In this Combine Data there is no missing values.
 
 ## Categorical Variables
 
--   Create a one-way contingency table, a two-way contingency table, and a three-way contingency table
-    for some of the factor variables you created previously. Use table() to accomplish this.
-    **–** Interpret a number from each resulting table (that is, pick out a value produced and explain what
-    that value means.)
+-   Create a one-way contingency table, a two-way contingency table, and a three-way contingency table for some of the factor variables you created previously. Use table() to accomplish this. **–** Interpret a number from each resulting table (that is, pick out a value produced and explain what that value means.)
 
--   Create a conditional two-way table using table(). That is, condition on one variable’s setting and
-    create a two-way table. Do this using two different methods:
+-   Create a conditional two-way table using table(). That is, condition on one variable’s setting and create a two-way table. Do this using two different methods:
 
-    **–** Once, by subsetting the data (say with filter()) and then creating the two-way table
-    **–** Once, by creating a three-way table and subsetting it.						
+    **–** Once, by subsetting the data (say with filter()) and then creating the two-way table **–** Once, by creating a three-way table and subsetting it.
 
--   Create a two-way contingency table using group_by() and summarize() from dplyr. Then use
-    pivot_wider() to make the result look more like the output from table().
+-   Create a two-way contingency table using group_by() and summarize() from dplyr. Then use pivot_wider() to make the result look more like the output from table().
 
--   Create a stacked bar graph and a side-by-side bar graph. Give relevant x and y labels, and a title for
-    the plots.
+-   Create a stacked bar graph and a side-by-side bar graph. Give relevant x and y labels, and a title for the plots.
 
 ```{r}
-# One way contingency table
-comb
+# 1.a.  One-way contingency table
+print("One-way contingency Table \n")
+table(combine_data$sex, useNA = "always")
 
+
+```
+
+```{r}
+# b. Two-way contingency table
+print("Two-way contingency table\n")
+table(combine_data$sex, combine_data$school)
+
+```
+
+```{r}
+# c. Three-way contingency table
+print("Three-way contingency table")
+table(combine_data$school, combine_data$address, combine_data$reason)
+
+```
+
+### 2. Create a conditional two-way table using table().
+
+-   **–** Once, by subsetting the data (say with filter()) and then creating the two-way table.
+
+```{r}
+cond_data <- filter(combine_data, address == "Urban")
+cond_table <- table(cond_data$sex, cond_data$school)
+cond_table
+```
+
+-   **–** Once, by creating a three-way table and subsetting it.
+
+```{r}
+three_way_table <- table(combine_data$reason, combine_data$school,combine_data$address)
+cond_three_way_table <- three_way_table["Course",	,]
+cond_three_way_table
+
+```
+
+### 3. Create a two-way contingency table using group_by() and summarize() from dplyr. Then use
+
+pivot_wider() to make the result look more like the output from table().
+
+```{r}
+combine_data |>
+  group_by(address,school) |>
+  summarize(count = n(), .groups = 'drop') |> #.groups = "drop" :-- drop the grouping structure after summarization
+  pivot_wider(names_from = address, values_from = count)
+  
+```
+
+### 4. Create a stacked bar graph and a side-by-side bar graph.
+
+-   Stacked Bar Graph
+
+```{r}
+ggplot(combine_data) +
+  geom_bar(aes(x=school, fill = reason)) +
+  labs(
+    title = "Distribution of Students by school and Reason for choosing the school",
+    x = "School",
+    y = "Number of Students"
+  ) +
+  theme_classic()
+
+```
+
+-   Side by side bar graph
+
+```{r}
+ggplot(data = combine_data) +
+  aes(x = sex, fill = school) +
+  geom_bar(position = "dodge") +
+  scale_fill_discrete("school") +
+  facet_wrap(~sex) +
+  labs(
+    title = "Count of students by school and sex",
+    x = "Sex",
+    y = "Number of Students"
+  ) +
+  theme_gray()
+  
+
+```
+
+## Numerical Variables (and across groups)
+
+-   Here is age, absences and the three test grades variables (G1, G2 and G3) are numeric. \### 1. • Find measures of center and spread for three of these variables (including at least one G3 variable) – Repeat while subsetting the data in a meaningful way.
+
+```{r}
+# Measure of center
+meas_of_center <- combine_data |>
+  summarize(across(c("age","absences.x","absences.y","G3.x", "G3.y"),
+                  list("Mean" = mean, "Median" = median, "Std" = sd, "IQR" = IQR ),
+                  .names = "{.col}_{.fn}"))
+
+meas_of_center_long <- meas_of_center |>
+  pivot_longer(cols = everything(),
+               names_to = c("Feature", "Statistic"),
+                            names_sep = "_",
+               values_to = "value")
+
+# View the result in long format
+View(meas_of_center_long)
+meas_of_center_long
+
+
+```
+
+-   Subset the data according to sex = Male
+
+```{r}
+subset_sex_statistics <- combine_data |>
+  filter(sex=="Male") |>
+  summarize(across(c("age","absences.x","absences.y","G3.x", "G3.y"),
+                  list("Mean" = mean, "Median" = median, "Std" = sd, "IQR" = IQR ),
+                  .names = "{.col}_{.fn}"))
+
+subset_meas_of_center_long <- subset_sex_statistics |>
+  pivot_longer(cols = everything(),
+               names_to = c("Feature", "Statistic"),
+                            names_sep = "_",
+               values_to = "value")
+View(subset_meas_of_center_long)
+
+```
+
+-   subset the data according to school
+
+```{r}
+subset_school_statistics <- combine_data |>
+  filter(school=="Gabriel Pereira") |>
+  summarize(across(c("age","absences.x","absences.y","G3.x", "G3.y"),
+                  list("Mean" = mean, "Median" = median, "Std" = sd, "IQR" = IQR ),
+                  .names = "{.col}_{.fn}"))
+
+subset_school_meas_of_center_long <- subset_school_statistics |>
+  pivot_longer(cols = everything(),
+               names_to = c("Feature", "Statistic"),
+                            names_sep = "_",
+               values_to = "value")
+View(subset_school_meas_of_center_long)
+
+```
+
+-   Find measures of center and spread across a single grouping variable for three of these variables (including a G3 variable as one of them)
+
+```{r}
+subset_school_statistics <- combine_data |>
+  group_by(school) |>
+  summarize(across(c("age","absences.x","absences.y","G3.x", "G3.y"),
+                  list("Mean" = mean, "Median" = median, "Std" = sd, "IQR" = IQR ),
+                  .names = "{.col}_{.fn}"))
+
+subset_school_meas_of_center_long <- subset_school_statistics |>
+  pivot_longer(cols = -school,
+               names_to = c("Feature", "Statistic"),
+                            names_sep = "_",
+               values_to = "value")
+View(subset_school_meas_of_center_long)
+```
+
+-   Find measures of center and spread across two grouping variables for three of these variables (including a G3 variable as one of them)
+
+```{r}
+school_sex_statistics <- combine_data |>
+  group_by(school, sex) |>
+  summarize(across(c("age","absences.x","absences.y","G3.x", "G3.y"),
+                  list("Mean" = mean, "Median" = median, "Std" = sd, "IQR" = IQR ),
+                  .names = "{.col}_{.fn}"))
+
+school_sex_meas_of_center_long <- school_sex_statistics |>
+  pivot_longer(cols = -c("school","sex"),
+               names_to = c("Feature", "Statistic"),
+                            names_sep = "_",
+               values_to = "value")
+View(school_sex_meas_of_center_long)
+```
+
+-   Create a correlation matrix between all of the numeric variables
+
+```{r}
+corr_mat <- combine_data |>
+  select(where(is.numeric))
+
+#pair_cor_mat <- cor(corr_mat ,use = "pairwise.complete.obs")
+#pair_cor_ma
+View(cor(corr_mat))
+```
+
+-   Create a histogram, kernel density plot, and boxplot for two of the numeric variables across one of the categorical variables (that is, create graphs that can compare the distributions across the groups on the same plot (no faceting here)). Add appropriate labels and titles. \# create 6 graphs
+
+```{r}
+# Histogram
+hist_age <- ggplot(combine_data, aes(x = age, fill = sex)) +
+  geom_histogram(position = "dodge", alpha = 0.6, binwidth = 1) +
+  labs(
+    title = "Histogram of Age by Sex",
+    x = "Age",
+    y = "Count",
+    fill = "Sex"
+  ) +
+  theme_minimal()
+hist_age
+```
+
+```{r}
+histogram_plot <- ggplot(combine_data, aes(x = age, fill = school)) +
+  geom_histogram(binwidth = 1, color = "black", position = "dodge") +
+  labs(
+    title = "Histogram of Age by School",
+    x = "Age",
+    y = "Count",
+    fill = "School"
+  ) +
+  theme_minimal()
+
+histogram_plot
+```
+
+```{r}
+# kernel density plot
+
+kernel_plot <- ggplot(combine_data, aes(x = age, color = school, linetype = as.factor(failures))) +
+  geom_density(alpha = 0.5, aes(fill = as.factor(failures))) +
+  theme_minimal() +
+  labs(
+    title = "Kernel Density Plot of Age by Reason and Failures",
+    x = "Age",
+    y = "Density",
+    color = "Reason for Absence",
+    linetype = "Number of Failures",
+    fill = "Number of Failures"
+  )
+
+kernel_plot
+```
+
+```{r}
+# Kernel Density Plot
+kernel_plot <- ggplot(combine_data, aes(x = age, color = sex, linetype = as.factor(failures))) +
+  geom_density(alpha = 0.5, aes(fill = as.factor(failures))) +
+  theme_minimal() +
+  labs(
+    title = "Kernel Density Plot of Age by Reason and Failures",
+    x = "Age",
+    y = "Density",
+    color = "Reason for Absence",
+    linetype = "Number of Failures",
+    fill = "Number of Failures"
+  )
+
+kernel_plot
+```
+
+```{r}
+# boxplot
+school_boxplot <- ggplot(combine_data) +
+  geom_boxplot(aes(x = school, y = age, fill = school)) +
+  geom_jitter(aes(x = school, y = age), width = 0.1, alpha = 0.3) + 
+  labs(
+    title = "Age Distribution by School",
+    x = "School",
+    y = "Age",
+    fill = "School"
+  ) +
+  theme_minimal()
+
+school_boxplot
+```
+
+```{r}
+# Boxplot
+reason_boxplot <- ggplot(combine_data) +
+ geom_boxplot(aes(x = reason, y = absences.x, fill = reason))
+ 
+reason_boxplot 
+```
+
+-   Create two scatter plots relating a G3 variable to other numeric variables (put G3 on the y-axis). You should jitter the points if they sit on top of each other. Color the points by a categorical variable in each. Add appropriate labels and titles.
+
+```{r}
+#numeric_scatter <- ggplot(combine_data) |>
+#  aes(x = age, y = G3, color = sex)
+#numeric_scatter + geom_point()
+numeric_scatter <- ggplot(combine_data, aes(x = age, y = G3.x, color = sex)) +
+  geom_point() +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  labs(title = "Scatter Plot of Age vs G3.x by Sex",
+       x = "Age",
+       y = "Final Grade(G3)")
+numeric_scatter
+```
+
+```{r}
+numeric_scatter_absence <- ggplot(combine_data, aes(x = absences.x, y = G3.x, color = sex)) +
+  geom_point() +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  labs(title = "Scatter Plot of Absences vs G3.x by Sex",
+       x = "Absences",
+       y = "Final Grade(G3)")
+numeric_scatter_absence
+
+
+```
+
+-   Repeat the scatter plot step but use faceting to obtain graphs at each setting of another categorical variable.
+
+```{r}
+numeric_scatter_facet <- ggplot(combine_data, aes(x = age, y = G3.x, color = sex)) +
+  geom_point() +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  facet_wrap(~ school) +  
+  labs(title = "Scatter Plot of Age vs G3.x by Sex, Faceted by School",
+    x = "Age",
+    y = "Final Grade (G3)",
+    color = "Sex"
+  ) +
+  theme_light()
+
+numeric_scatter_facet
+
+```
+
+```{r}
+numeric_scatter_absence_facet <- ggplot(combine_data, aes(x = absences.x, y = G3.x, color = sex)) +
+  geom_point() +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  facet_wrap(~ address)
+  labs(title = "Scatter Plot of Absences vs G3.x by Address",
+       x = "Absences",
+       y = "Final Grade(G3)") +
+    theme_classic()
+numeric_scatter_absence_facet
+```
+
+-   Repeat the scatter plot step but use faceting to obtain graphs at each combination of two categorical variables.
+
+```{r}
+
+categ_scatter <- ggplot(combine_data, aes(x = age, y = G3.x, color = sex)) +
+  geom_point() +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  facet_grid(school ~ sex) +  # Facet by 'school' (rows) and 'sex' (columns)
+  labs(
+    title = "Scatter Plot of Age vs G3.x by School and Sex",
+    x = "Age",
+    y = "Final Grade (G3)",
+    color = "Sex"
+  ) 
+categ_scatter
 ```
